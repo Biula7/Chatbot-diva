@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
@@ -7,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('.'));
 
-const GEMINI_API_KEY = 'AIzaSyChzFz6KTBFwVzQ6FKccfOm8nWFoPdwdwc'; // Substitua pela sua chave da API do Gemini
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
 
 // Armazenamento em memória para o histórico de cada sessão
