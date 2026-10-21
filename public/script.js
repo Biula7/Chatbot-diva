@@ -1,6 +1,7 @@
 
-// Gera um ID único para a sessão do usuário
-const sessionId = Math.random().toString(36).substring(2, 15);
+// Histórico da conversa guardado no navegador e enviado a cada mensagem
+// (a Vercel é serverless, então o servidor não guarda memória entre requisições)
+const history = [];
 
 function formatDateTime() {
   const options = {
@@ -25,7 +26,10 @@ function addMessageToChat(sender, message) {
   const chatbox = document.getElementById('chatbox');
   const messageDiv = document.createElement('div');
   messageDiv.className = sender === 'Usuário' ? 'user' : 'bot';
-  messageDiv.innerHTML = `<strong>${sender}:</strong> ${message}`;
+  const label = document.createElement('strong');
+  label.textContent = `${sender}: `;
+  messageDiv.appendChild(label);
+  messageDiv.appendChild(document.createTextNode(message));
   chatbox.appendChild(messageDiv);
   chatbox.scrollTop = chatbox.scrollHeight;
 }
@@ -39,13 +43,16 @@ async function sendMessage() {
   input.value = '';
 
   try {
-    const response = await fetch('http://localhost:3000/api/chat', {
+    const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId, message })
+      body: JSON.stringify({ message, history })
     });
     const data = await response.json();
     if (data.reply) {
+      if (response.ok) {
+        history.push({ role: 'user', text: message }, { role: 'model', text: data.reply });
+      }
       addMessageToChat('Chatbot Pajubá', data.reply);
       displayDateTime();
     } else {
